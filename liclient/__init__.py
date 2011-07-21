@@ -81,7 +81,6 @@ class LinkedInAPI(object):
             url = self.prepare_field_selectors(selectors, url)
             resp, content = client.request(url, 'GET')
         
-        content = self.clean_dates(content)
         return LinkedInXMLParser(content).results
     
     def get_user_connections(self, access_token, selectors=None, **kwargs):
@@ -96,7 +95,6 @@ class LinkedInAPI(object):
         user_token, url = self.prepare_request(access_token, url, kwargs)
         client = oauth.Client(self.consumer, user_token)
         resp, content = client.request(url, 'GET')
-        content = self.clean_dates(content)
         return LinkedInXMLParser(content).results
     
     def get_network_updates(self, access_token, **kwargs):
@@ -118,7 +116,6 @@ class LinkedInAPI(object):
         user_token, url = self.prepare_request(access_token, self.api_network_update_url, kwargs)
         client = oauth.Client(self.consumer, user_token)
         resp, content = client.request(url, 'GET')
-        content = self.clean_dates(content)
         return LinkedInXMLParser(content).results
         
     def get_comment_feed(self, access_token, network_key):
@@ -130,7 +127,6 @@ class LinkedInAPI(object):
         user_token, url = self.prepare_request(access_token, url)
         client = oauth.Client(self.consumer, user_token)
         resp, content = client.request(url, 'GET')
-        content = self.clean_dates(content)
         return LinkedInXMLParser(content).results
         
     def submit_comment(self, access_token, network_key, bd):
@@ -273,18 +269,6 @@ class LinkedInAPI(object):
         if code not in self.valid_network_update_codes:
             raise ValueError('Code %s not a valid update code' % code)
             
-    def clean_dates(self, content):
-        data = etree.fromstring(content)
-        for d in data.iter(tag=etree.Element):
-            try:
-                trial = int(d.text)
-                if len(d.text) > 8:
-                    dt = datetime.datetime.fromtimestamp(float(trial)/1000)
-                    d.text = dt.strftime('%m/%d/%Y %I:%M:%S')
-            except:
-                continue
-        return etree.tostring(data)
-    
     def dt_obj_to_string(self, dtobj):
         if type(dtobj) == type(int()) or type(dtobj) == type(str()) or type(dtobj) == type(long()):
             return dtobj
