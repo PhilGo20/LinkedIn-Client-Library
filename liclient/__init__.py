@@ -63,7 +63,7 @@ class LinkedInAPI(object):
         access_token = dict(urlparse.parse_qsl(content))
         return access_token
     
-    def get_user_profile(self, access_token, selectors=None, **kwargs):
+    def get_user_profile(self, access_token, selectors=None, headers=None, **kwargs):
         """
         Get a user profile.  If keyword argument "id" is not supplied, this
         returns the current user's profile, else it will return the profile of
@@ -74,12 +74,15 @@ class LinkedInAPI(object):
         assert type(selectors) == type([]), '"Keyword argument "selectors" must be of type "list"'
         user_token, url = self.prepare_request(access_token, self.api_profile_url, kwargs)
         client = oauth.Client(self.consumer, user_token)
+
+        if headers is None:
+            headers = {}
         
         if not selectors:
-            resp, content = client.request(self.api_profile_url, 'GET')
+            resp, content = client.request(self.api_profile_url, 'GET', headers=headers)
         else:
             url = self.prepare_field_selectors(selectors, url)
-            resp, content = client.request(url, 'GET')
+            resp, content = client.request(url, 'GET', headers=headers)
         
         return LinkedInXMLParser(content).results
     
