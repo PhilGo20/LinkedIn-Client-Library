@@ -83,7 +83,7 @@ class LinkedInAPI(object):
         
         return LinkedInXMLParser(content).results
     
-    def get_user_connections(self, access_token, selectors=None, params=None):
+    def get_user_connections(self, access_token, selectors=None, params=None, headers=None):
         """
         Get the connections of the current user.  Valid keyword arguments are
         "count" and "start" for the number of profiles you wish returned.  Types
@@ -94,9 +94,11 @@ class LinkedInAPI(object):
             url = self.prepare_field_selectors(selectors, self.api_profile_connections_url)
         if params is None:
             params = {}
+        if headers is None:
+            headers = {}
         user_token, url = self.prepare_request(access_token, url, params)
         client = oauth.Client(self.consumer, user_token)
-        resp, content = client.request(url, 'GET')
+        resp, content = client.request(url, 'GET', headers=headers)
         return LinkedInXMLParser(content).results
     
     def get_network_updates(self, access_token, **kwargs):
