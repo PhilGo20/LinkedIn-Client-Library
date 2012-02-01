@@ -178,6 +178,18 @@ class LinkedInProfileParser(LinkedInXMLParser):
             for item in p.getchildren():
                 if item.tag == 'location':
                     person['location'] = item.getchildren()[0].text
+                elif item.tag == 'date-of-birth':
+                    temp_obj = {}
+                    for dob_item in item.getchildren():
+                        temp_obj[dob_item.tag] = dob_item.text
+
+                    if temp_obj.get('day') and temp_obj.get('month') and temp_obj.get('year'):
+                        person['date_of_birth'] = '/'.join(
+                            (temp_obj.get('month'),temp_obj.get('day'),temp_obj.get('year'),)
+                        )
+                    else:
+                        # skip when no year
+                        pass
                 else:
                     person[re.sub(r'-', '_', item.tag)] = item.text
             obj = mappers.Profile(person, p)
